@@ -1,6 +1,6 @@
 create table Document 
 (
-    STT int,
+    STT int ,
 	MaSach varchar(50) not null,
 	TenSach text not null,
 	TacGia varchar(5000) not null,
@@ -12,7 +12,7 @@ create table Document
     Picture mediumblob,
 	constraint pk_MaSach primary key (MaSach)
 );
--- drop table Document;
+ drop table Document;
 
 create table Borrowing
 (   
@@ -27,7 +27,7 @@ create table Borrowing
 	constraint pk_MaMuon primary key (MaMuon),
 	constraint fk_MaSach foreign key (MaSach) references Document(MaSach) on update cascade on delete cascade
 );
--- drop table Borrowing;
+drop table Borrowing;
 
 create table user
 (
@@ -76,6 +76,9 @@ VALUES
 (9, 'P009', 'Le Thi I', '1999-09-09', 'Nu', '106 Vo Van Tan, Quy Nhon', 'lethii@gmail.com', 1234567898, 'user9', 'password9'),
 (10, 'P010', 'Do Van J', '2000-10-10', 'Nam', '107 Phan Chu Trinh, Thanh Hoa', 'dovanj@gmail.com', 1234567899, 'user10', 'password10');
 
+INSERT INTO admin (STT, personID, HoTen, NgaySinh, GioiTinh, DiaChi, Email, SoDienThoai, TenDangNhap, MatKhau)
+VALUES
 
-
-
+    (1, '1', 'Đào Huy Hoàng', '2005-12-23', 'Nam', 'Ý Yên, Nam Định', 'hoangdh2312@gmail.com', 0352712366, 'admin1', 'password1'),
+    (1, '2', 'Nguyễn Văn Duy', '2005-12-10', 'Nam', 'Hưng Yên', 'duynv@gmail.com', 0352712365, 'admin2', 'password2'),
+    (1, '3', 'Nguyễn Văn Hoàng', '2005-10-30', 'Nam', 'Thái Bình', 'hoangnv@gmail.com', 0352712367, 'admin3', 'password3');
