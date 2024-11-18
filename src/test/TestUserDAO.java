@@ -3,6 +3,7 @@ package test;
 import DAO.UserDAO;
 import model.User;
 import model.Account;
+import model.Admin;
 import util.Date;
 
 import javax.rmi.CORBA.Util;

@@ -5,6 +5,7 @@ import DataBase.GoogleBooksImporter;
 import DataBase.JDBCConnection;
 import DAO.DocumentDAO;
 
+
 import model.Document;
 import model.Person;
 import model.User;
@@ -21,6 +22,7 @@ public class TestDocumentDAO {
         // Document documentSearchh = DocumentDAO.getInstance().findDocumentById("Book1");            // Tìm sach theo id thành công
 
         // Document documentSearch = DocumentDAO.getInstance().findDocumentByTitle("Bí kíp tán gái"); // Tìm sách theo tên thành công
+
 
         // Document documentSearch = DocumentDAO.getInstance().findDocumentByCategory("Sach tán gái"); // Tìm sách theo tiêu đề thành công
     }
