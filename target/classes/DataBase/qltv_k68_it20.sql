@@ -13,6 +13,9 @@ create table Document
 	constraint pk_MaSach primary key (MaSach)
 );
  drop table Document;
+ 
+ alter table document
+ drop column STT;
 
 create table Borrowing
 (   
@@ -28,6 +31,9 @@ create table Borrowing
 	constraint fk_MaSach foreign key (MaSach) references Document(MaSach) on update cascade on delete cascade
 );
 drop table Borrowing;
+
+alter table borrowing
+drop column STT;
 
 create table user
 (
@@ -47,6 +53,9 @@ create table user
 alter table user
 modify Email varchar(255);
 
+alter table user
+drop column STT;
+
 create table admin
 (
     STT int,
@@ -62,6 +71,8 @@ create table admin
 	constraint pk_personID primary key (personID)
 );
 -- drop table admin
+alter table admin
+drop column STT;
 
 INSERT INTO admin (STT, personID, HoTen, NgaySinh, GioiTinh, DiaChi, Email, SoDienThoai, TenDangNhap, MatKhau)
 VALUES

@@ -45,19 +45,18 @@ public class UserDAO implements UserDAOInterface {
             return;
         }
 
-        String sql = "INSERT INTO user (STT,personID, HoTen, NgaySinh, GioiTinh, DiaChi, Email, SoDienThoai, TenDangNhap, MatKhau) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO user (personID, HoTen, NgaySinh, GioiTinh, DiaChi, Email, SoDienThoai, TenDangNhap, MatKhau) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection connection = JDBCConnection.getJDBCConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setInt(1,STT++);
-            preparedStatement.setString(2, user.getId());
-            preparedStatement.setString(3, user.getName());
-            preparedStatement.setDate(4, new java.sql.Date(user.getBirthday().toSqlDate().getTime()));
-            preparedStatement.setString(5, user.getGender());
-            preparedStatement.setString(6, user.getAddress());
-            preparedStatement.setString(7, user.getEmail());
-            preparedStatement.setString(8, user.getPhoneNumber());
-            preparedStatement.setString(9, user.getAccount().getUserName());
-            preparedStatement.setString(10, user.getAccount().getPassWord());
+            preparedStatement.setString(1, user.getId());
+            preparedStatement.setString(2, user.getName());
+            preparedStatement.setDate(3, new java.sql.Date(user.getBirthday().toSqlDate().getTime()));
+            preparedStatement.setString(4, user.getGender());
+            preparedStatement.setString(5, user.getAddress());
+            preparedStatement.setString(6, user.getEmail());
+            preparedStatement.setString(7, user.getPhoneNumber());
+            preparedStatement.setString(8, user.getAccount().getUserName());
+            preparedStatement.setString(9, user.getAccount().getPassWord());
 
             int result = preparedStatement.executeUpdate();
 
