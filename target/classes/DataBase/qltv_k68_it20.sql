@@ -13,9 +13,6 @@ create table Document
 	constraint pk_MaSach primary key (MaSach)
 );
  drop table Document;
- 
- alter table document
- drop column STT;
 
 create table Borrowing
 (   
@@ -32,12 +29,8 @@ create table Borrowing
 );
 drop table Borrowing;
 
-alter table borrowing
-drop column STT;
-
 create table user
 (
-    STT int,
 	personID varchar(50) not null,
 	HoTen varchar(100) not null,
 	NgaySinh date not null,
@@ -47,14 +40,12 @@ create table user
 	SoDienThoai int,
     TenDangNhap VARCHAR(50) NOT NULL unique,
     MatKhau VARCHAR(255) NOT NULL,
+    Picture mediumblob,
 	constraint pk_personID primary key (personID)
 );
 -- drop table user
 alter table user
 modify Email varchar(255);
-
-alter table user
-drop column STT;
 
 create table admin
 (
@@ -71,8 +62,7 @@ create table admin
 	constraint pk_personID primary key (personID)
 );
 -- drop table admin
-alter table admin
-drop column STT;
+
 
 INSERT INTO admin (STT, personID, HoTen, NgaySinh, GioiTinh, DiaChi, Email, SoDienThoai, TenDangNhap, MatKhau)
 VALUES

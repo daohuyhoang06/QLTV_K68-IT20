@@ -1,13 +1,18 @@
 package controller;
 
 import DAO.DocumentDAO;
+import DAO.UserDAO;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -17,8 +22,10 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import login.LoginView;
 import model.Document;
+import model.User;
 import view.admin.AdminView;
 import view.borrowcard.BorrowCardView;
 import view.document.AddDocument;
@@ -30,6 +37,7 @@ import view.user.AddUser;
 import view.user.EditUser;
 import view.user.UserInfoView;
 
+import util.Date;
 import java.awt.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -71,19 +79,7 @@ public class AdminController {
     private Button qlNguoiDungButton;
     @FXML
     private AnchorPane quanLyNguoiDung;
-    @FXML
-    private Button addBookButton;
-    @FXML
-    private Button editBookButton;
-    @FXML
-    private Button viewInfoBookButton;
-    @FXML
-    private Button addUserButton;
-    @FXML
-    private Button editUserButton;
-    @FXML
-    private Button viewInfoUserButton;
-    @FXML
+
     private Button borrowBookButton;
     @FXML
     private Button returnBookButton;
@@ -94,7 +90,7 @@ public class AdminController {
     // QL sách
     @FXML
     private TableView<Document> tableViewBook;
-    @FXML private TableColumn<Integer, Integer> STT;  // Cột STT
+
     @FXML private TableColumn<Document, String> idColumn;   // Cột ID
     @FXML private TableColumn<Document, String> titleColumn;  // Cột Title
     @FXML private TableColumn<Document, String> categoryColumn;  // Cột Category
@@ -103,6 +99,41 @@ public class AdminController {
 
     @FXML
     private TextField searchBookField;
+    @FXML
+    private Button addBookButton;
+    @FXML
+    private Button deleteBookButton;
+    @FXML
+    private Button editBookButton;
+    @FXML
+    private Button viewInfoBookButton;
+    @FXML
+    private Button refreshBookButton;
+
+
+    // Quản Lý User
+    // QL sách
+    @FXML
+    private TableView<User> tableViewUser;
+
+    @FXML private TableColumn<User, String> personIdColumn;   // Cột ID
+    @FXML private TableColumn<User, String> personNameColumn;  // Cột Name
+    @FXML private TableColumn<User, String> genderColumn;  // Cột Gender
+    @FXML private TableColumn<User, Date> dateOfBirthColumn;  // Cột dateOfBirth
+    @FXML private TableColumn<User, String> phoneNumberColumn;  // Cột phoneNumber
+
+    @FXML
+    private TextField searchUserField;
+    @FXML
+    private Button addUserButton;
+    @FXML
+    private Button deleteUserButton;
+    @FXML
+    private Button editUserButton;
+    @FXML
+    private Button viewInfoUserButton;
+    @FXML
+    private Button refreshUserButton;
 
 
     public void setUsername(String username) {
@@ -159,14 +190,12 @@ public class AdminController {
     //Cửa sổ chính
     public void homeButtonOnAction(ActionEvent e) {
         hideAllPanes();
-       // loadImage();
         home.setVisible(!home.isVisible());
     }
 
     //Cửa sổ quản lý sách
     public void qlSachButtonOnAction(ActionEvent e) {
         hideAllPanes();
-        loadBook();
         quanLySach.setVisible(!quanLySach.isVisible());
     }
 
@@ -192,60 +221,79 @@ public class AdminController {
     public void addBookButtonOnAction(ActionEvent e) {
         AddDocument addDocument = new AddDocument();
         try {
-            addDocument.start(new Stage()); // Mở cửa sổ addDocument
+            addDocument.start(new Stage()); // Mở cửa sổ addUser
         } catch (Exception ex) {
             ex.printStackTrace();
+        }
+
+    }
+
+    // Xóa sách
+    public void deleteBookButtonOnAction(ActionEvent e) {
+        Document selectedBook = tableViewBook.getSelectionModel().getSelectedItem();
+        if(selectedBook != null) {
+            DocumentDAO documentDAO = new DocumentDAO();
+            documentDAO.deleteDocument(selectedBook.getId());
+            loadBook();
         }
     }
 
     // Edit book
     public void editBookButtonOnAction(ActionEvent e) {
-        EditDocument editDocument = new EditDocument();
-        try {
-           editDocument.start(new Stage()); // Mở cửa sổ editdocument
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        Document selectedBook = tableViewBook.getSelectionModel().getSelectedItem();
+        if(selectedBook != null) {
+            try {
+                // Tạo FXMLLoader để tải editdocument.fxml
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/document/editdocument.fxml"));
+
+                // Tải FXML và tạo Scene
+                Parent root = loader.load();
+
+                // Lấy controller của cửa sổ Edit Document từ FXMLLoader
+                EditDocumentController editDocumentController = loader.getController();
+                editDocumentController.setDocument(selectedBook);
+                editDocumentController.printInfo(selectedBook);
+
+                Stage stage = new Stage();
+                stage.setScene(new Scene(root));
+                stage.initStyle(StageStyle.UNDECORATED);
+
+                stage.show();
+
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
     }
 
     // Infor book
     public void viewInfoBookButtonOnAction(ActionEvent e) {
-        DocumentView documentView = new DocumentView();
+        Document selectedBook = tableViewBook.getSelectionModel().getSelectedItem();
         try {
-           documentView.start(new Stage()); // Mở cửa sổ documentview
+            // Tạo FXMLLoader để tải doucmentview.fxml
+            FXMLLoader loader = new FXMLLoader(DocumentImageDisplay.class.getResource("/view/document/documentview.fxml"));
+
+            // Tải FXML và tạo Scene
+            Parent root = loader.load();
+
+
+            DocumentController documentController = loader.getController();
+            documentController.setInfoById(selectedBook.getId());
+
+            // Tạo và hiển thị cửa sổ DocumentView
+            Stage stage = new Stage();
+            stage.setScene(new Scene(root));
+            stage.initStyle(StageStyle.UNDECORATED);
+
+            stage.show();
         } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
 
-    // Add user
-    public void addUserButtonOnAction(ActionEvent e) {
-        AddUser addUser = new AddUser();
-        try {
-            addUser.start(new Stage()); // Mở cửa sổ addUser
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    // Edit user
-    public void editUserButtonOnAction(ActionEvent e) {
-        EditUser editUser = new EditUser();
-        try {
-            editUser.start(new Stage()); // Mở cửa sổ editUser
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    // Infor user
-    public void viewInfoUserButtonOnAction(ActionEvent e) {
-        UserInfoView userInfoView = new UserInfoView();
-        try {
-           userInfoView.start(new Stage()); // Mở cửa sổ xem thông tin người dùng
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+    // Refresh Table View Book
+    public void refreshBookButtonOnAction(ActionEvent e) {
+        loadBook();
     }
 
     // Borrow book
@@ -292,6 +340,8 @@ public class AdminController {
         if (documentList != null && !documentList.isEmpty()) {
             ObservableList<Document> observableDocumentList = FXCollections.observableArrayList(documentList);
             tableViewBook.setItems(observableDocumentList);  // Đặt dữ liệu cho TableView
+        } else {
+            tableViewBook.setItems(FXCollections.observableArrayList()); // Đặt danh sách trống
         }
 
         // Lắng nghe thay đổi
@@ -306,13 +356,14 @@ public class AdminController {
                 }
             } else {
                 // Nếu có nội dung, lọc dữ liệu và cập nhật TableView
-                updateTableView(newValue);
+                updateTableViewBook(newValue);
             }
         });
     }
 
+
     //Update bảng theo từ khóa
-    public void updateTableView(String keyword) {
+    public void updateTableViewBook(String keyword) {
         // Lấy dữ liệu từ cơ sở dữ liệu
         DocumentDAO documentDAO = new DocumentDAO();
         List<Document> documentList = documentDAO.findAllDocuments();
@@ -330,6 +381,150 @@ public class AdminController {
 
     public void searchBookFieldOnAction(ActionEvent e) {
         String keyword = searchBookField.getText();
-        updateTableView(keyword);
+        updateTableViewBook(keyword);
+    }
+
+
+
+    // Add user
+    public void addUserButtonOnAction(ActionEvent e) {
+        AddUser addUser = new AddUser();
+        try {
+            addUser.start(new Stage()); // Mở cửa sổ addUser
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    // Xóa user
+    public void deleteUserButtonOnAction(ActionEvent e) {
+        User selectedUser = tableViewUser.getSelectionModel().getSelectedItem();
+        if(selectedUser != null) {
+           UserDAO userDAO = new UserDAO();
+           userDAO.deleteUser(selectedUser.getId());
+           loadUser();
+        }
+    }
+
+    // Edit user
+    public void editUserButtonOnAction(ActionEvent e) {
+       User selectedUser = tableViewUser.getSelectionModel().getSelectedItem();
+        if(selectedUser != null) {
+            try {
+                // Tạo FXMLLoader để tải edituser.fxml
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/user/edituser.fxml"));
+
+                // Tải FXML và tạo Scene
+                Parent root = loader.load();
+
+                // Lấy controller của cửa sổ Edit Document từ FXMLLoader
+                EditUserController editUserController = loader.getController();
+                editUserController.setUser(selectedUser);
+                editUserController.printInfo(selectedUser);
+
+                Stage stage = new Stage();
+                stage.setScene(new Scene(root));
+                stage.initStyle(StageStyle.UNDECORATED);
+
+                stage.show();
+
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+
+    // Infor user
+    public void viewInfoUserButtonOnAction(ActionEvent e) {
+        User selectedUser = tableViewUser.getSelectionModel().getSelectedItem();
+        try {
+            // Tạo FXMLLoader để tải doucmentview.fxml
+            FXMLLoader loader = new FXMLLoader(DocumentImageDisplay.class.getResource("/view/user/userinfoview.fxml"));
+
+            // Tải FXML và tạo Scene
+            Parent root = loader.load();
+
+
+            UserInfoController userInfoController = loader.getController();
+            userInfoController.setInfoById(selectedUser.getId());
+
+            // Tạo và hiển thị cửa sổ DocumentView
+            Stage stage = new Stage();
+            stage.setScene(new Scene(root));
+            stage.initStyle(StageStyle.UNDECORATED);
+
+            stage.show();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    // Refresh Table View Book
+    public void refreshUserButtonOnAction(ActionEvent e) {
+        loadUser();
+    }
+
+    // Load dữ liệu lên bảng user
+    public void loadUser() {
+        // Thiết lập các cột trong TableView
+
+        personIdColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getId()));
+        personNameColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getName()));
+        genderColumn.setCellValueFactory(cellData->new SimpleStringProperty(cellData.getValue().getGender()));
+        dateOfBirthColumn.setCellValueFactory(cellData -> {
+            return new SimpleObjectProperty<>(cellData.getValue().getBirthday());
+        });
+        phoneNumberColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getPhoneNumber()));
+
+        // Lấy dữ liệu từ cơ sở dữ liệu và hiển thị lên TableView
+        UserDAO userDAO = new UserDAO();
+        List<User> userList = userDAO.findAllUsers();
+
+        // Hiển thị danh sách user
+        if (userList != null && !userList.isEmpty()) {
+            ObservableList<User> observableUserList = FXCollections.observableArrayList(userList);
+            tableViewUser.setItems(observableUserList);  // Đặt dữ liệu cho TableView
+        } else {
+            tableViewUser.setItems(FXCollections.observableArrayList()); // Đặt danh sách trống
+        }
+
+        // Lắng nghe thay đổi
+        searchUserField.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue == null || newValue.trim().isEmpty()) {
+                // Nếu TextField trống, hiển thị lại toàn bộ danh sách user
+                if (userList != null && !userList.isEmpty()) {
+                    ObservableList<User> observableUserList = FXCollections.observableArrayList(userList);
+                    tableViewUser.setItems(observableUserList);  // Đặt dữ liệu cho TableView
+                } else {
+                    System.out.println("No user to display.");
+                }
+            } else {
+                // Nếu có nội dung, lọc dữ liệu và cập nhật TableView
+                updateTableViewUser(newValue);
+            }
+        });
+    }
+
+
+    //Update bảng theo từ khóa
+    public void updateTableViewUser(String keyword) {
+        // Lấy dữ liệu từ cơ sở dữ liệu
+        UserDAO userDAO = new UserDAO();
+        List<User> userList = userDAO.findAllUsers();
+
+        // Lọc danh sách theo keyword
+        List<User> filteredList = userList.stream()
+                .filter(user -> user.getId().toLowerCase().contains(keyword.toLowerCase()) || // Tìm theo id
+                        user.getName().toLowerCase().contains(keyword.toLowerCase()) || // Tìm theo tên
+                        user.getPhoneNumber().toLowerCase().contains(keyword.toLowerCase()) )  // Tìm theo  số điện thoại
+                .collect(Collectors.toList());
+
+        // Cập nhật TableView với dữ liệu được lọc
+        tableViewUser.setItems(FXCollections.observableArrayList(filteredList));
+    }
+
+    public void searchUserFieldOnAction(ActionEvent e) {
+        String keyword = searchUserField.getText();
+        updateTableViewUser(keyword);
     }
 }

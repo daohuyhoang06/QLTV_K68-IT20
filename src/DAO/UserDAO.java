@@ -19,16 +19,6 @@ import java.util.ArrayList;
  */
 public class UserDAO implements UserDAOInterface {
 
-    public int STT = 1;
-
-    public int getSTT() {
-        return STT;
-    }
-
-    public void setSTT(int STT) {
-        this.STT = STT;
-    }
-
     public static UserDAO getInstance() {
         return new UserDAO();
     }
@@ -45,7 +35,7 @@ public class UserDAO implements UserDAOInterface {
             return;
         }
 
-        String sql = "INSERT INTO user (personID, HoTen, NgaySinh, GioiTinh, DiaChi, Email, SoDienThoai, TenDangNhap, MatKhau) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO user (personID, HoTen, NgaySinh, GioiTinh, DiaChi, Email, SoDienThoai, TenDangNhap, MatKhau, Picture) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection connection = JDBCConnection.getJDBCConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, user.getId());
@@ -57,6 +47,7 @@ public class UserDAO implements UserDAOInterface {
             preparedStatement.setString(7, user.getPhoneNumber());
             preparedStatement.setString(8, user.getAccount().getUserName());
             preparedStatement.setString(9, user.getAccount().getPassWord());
+            preparedStatement.setBytes(10, user.getPicture());
 
             int result = preparedStatement.executeUpdate();
 
@@ -78,7 +69,7 @@ public class UserDAO implements UserDAOInterface {
             return;
         }
 
-        String sql = "UPDATE user SET HoTen = ?, NgaySinh = ?, GioiTinh = ?, DiaChi = ?, Email = ?, SoDienThoai = ?, TenDangNhap = ?, MatKhau = ? WHERE personID = ?";
+        String sql = "UPDATE user SET HoTen = ?, NgaySinh = ?, GioiTinh = ?, DiaChi = ?, Email = ?, SoDienThoai = ?, TenDangNhap = ?, MatKhau = ?, Picture = ? WHERE personID = ?";
 
         try (Connection connection = JDBCConnection.getJDBCConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
@@ -91,7 +82,8 @@ public class UserDAO implements UserDAOInterface {
             preparedStatement.setString(6, user.getPhoneNumber());
             preparedStatement.setString(7, user.getAccount().getUserName());
             preparedStatement.setString(8, user.getAccount().getPassWord());
-            preparedStatement.setString(9, user.getId());
+            preparedStatement.setBytes(9, user.getPicture());
+            preparedStatement.setString(10, user.getId());
 
             int result = preparedStatement.executeUpdate();
             if (result > 0) {
@@ -189,6 +181,30 @@ public class UserDAO implements UserDAOInterface {
         return null;
     }
 
+    @Nullable
+    @Override
+    public User findUserByUserName(@Nullable String userName) {
+        if (userName == null || userName.isEmpty()) {
+            System.err.println("Tên đăng nhập không tồn tại...");
+            return null;
+        }
+
+        String sql = "SELECT * FROM user WHERE TenDangNhap = ?";
+        try (Connection connection = JDBCConnection.getJDBCConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+
+            preparedStatement.setString(1, userName);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return extractUserFromResultSet(resultSet);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi tìm kiếm người dùng theo tên đăng nhập");
+        }
+        return null;
+    }
+
     /**
      * Truy vấn tất cả người dùng từ cơ sở dữ liệu.
      *
@@ -233,6 +249,7 @@ public class UserDAO implements UserDAOInterface {
         String password = resultSet.getString("MatKhau");
 
         Account account = new Account(username, password);
-        return new User(name, birthday, personID, address, phoneNumber, gender, email, account);
+        byte[] picture = resultSet.getBytes("Picture");
+        return new User(name, birthday, personID, address, phoneNumber, gender, email, account, picture);
     }
 }
