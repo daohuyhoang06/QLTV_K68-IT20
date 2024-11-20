@@ -13,6 +13,9 @@ create table Document
 	constraint pk_MaSach primary key (MaSach)
 );
  drop table Document;
+ 
+ alter table document
+ drop column STT;
 
 create table Borrowing
 (   
@@ -28,6 +31,9 @@ create table Borrowing
 	constraint fk_MaSach foreign key (MaSach) references Document(MaSach) on update cascade on delete cascade
 );
 drop table Borrowing;
+
+alter table borrowing
+drop column STT;
 
 create table user
 (
@@ -46,6 +52,10 @@ create table user
 -- drop table user
 alter table user
 modify Email varchar(255);
+
+alter table user
+add Picture mediumblob;
+
 
 create table admin
 (

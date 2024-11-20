@@ -4,9 +4,7 @@ import DAO.UserDAO;
 import model.Document;
 import model.User;
 import model.Account;
-
 import util.Date;
-
 import javax.rmi.CORBA.Util;
 import java.util.ArrayList;
 

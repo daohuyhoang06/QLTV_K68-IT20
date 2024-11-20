@@ -217,7 +217,7 @@ public class BorrowReturnAD {
 
         // Tạo đối tượng Date và User
         Date date1 = new Date(23, 12, 2005);
-        User user1 = new User("Đào Huy Hoàng", date1, "K68_02", "Nam Định", "12345", "Nam", "hoangdao@gmail.com");
+     //   User user1 = new User("Đào Huy Hoàng", date1, "K68_02", "Nam Định", "12345", "Nam", "hoangdao@gmail.com", );
 
         // Tạo đối tượng Document
         Document document = new Document("UIUC:30112057150333", "Lập trình Java cơ bản", "Nguyễn Văn A", "Giáo trình", "NXB Khoa Học", 100, 30);

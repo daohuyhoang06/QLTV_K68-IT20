@@ -53,6 +53,9 @@ create table user
 alter table user
 modify Email varchar(255);
 
+alter table user
+add Picture mediumblob;
+
 
 create table admin
 (

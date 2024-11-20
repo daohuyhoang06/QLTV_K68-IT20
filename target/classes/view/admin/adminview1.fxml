@@ -586,7 +586,7 @@
                                     <String fx:value="cursor_hand" />
                                  </styleClass>
                                       </Button>
-                                      <Button fx:id="editUserButton" layoutX="565.0" layoutY="611.0" mnemonicParsing="false" onAction="#editUserButtonOnAction" prefHeight="54.0" prefWidth="136.0" style="-fx-background-color: #FFE082;" stylesheets="@../../resources/adminview.css" text="Sửa">
+                                      <Button fx:id="editUserButton" layoutX="534.0" layoutY="611.0" mnemonicParsing="false" onAction="#editUserButtonOnAction" prefHeight="54.0" prefWidth="136.0" style="-fx-background-color: #FFE082;" stylesheets="@../../resources/adminview.css" text="Sửa">
                                           <font>
                                               <Font size="18.0" />
                                           </font>
@@ -595,7 +595,7 @@
                                     <String fx:value="cursor_hand" />
                                  </styleClass>
                                       </Button>
-                                      <Button fx:id="viewUserInfoButton" alignment="CENTER" layoutX="771.0" layoutY="611.0" mnemonicParsing="false" onAction="#viewInfoUserButtonOnAction" prefHeight="54.0" prefWidth="136.0" style="-fx-background-color: #81D4FA;" text="Xem">
+                                      <Button fx:id="viewUserInfoButton" alignment="CENTER" layoutX="753.0" layoutY="611.0" mnemonicParsing="false" onAction="#viewInfoUserButtonOnAction" prefHeight="54.0" prefWidth="136.0" style="-fx-background-color: #81D4FA;" text="Xem">
                                           <font>
                                               <Font size="18.0" />
                                           </font>
@@ -606,8 +606,8 @@
                                       </Button>
                                       <FontAwesomeIcon glyphName="TIMES_CIRCLE" layoutX="330.0" layoutY="645.0" size="20" text="" />
                                       <FontAwesomeIcon glyphName="PLUS_CIRCLE" layoutX="110.0" layoutY="645.0" size="20" />
-                                      <FontAwesomeIcon glyphName="EDIT" layoutX="592.0" layoutY="646.0" size="20" text="" />
-                                      <FontAwesomeIcon glyphName="EYE" layoutX="791.0" layoutY="645.0" size="20" />
+                                      <FontAwesomeIcon glyphName="EDIT" layoutX="555.0" layoutY="645.0" size="20" text="" />
+                                      <FontAwesomeIcon glyphName="EYE" layoutX="773.0" layoutY="646.0" size="20" text="" />
                                         <Label layoutX="35.0" layoutY="20.0" text="Quản Lý Người Dùng">
                                             <font>
                                                 <Font name="Tahoma Bold" size="25.0" />
