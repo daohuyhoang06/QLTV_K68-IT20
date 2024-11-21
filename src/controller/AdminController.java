@@ -1,5 +1,6 @@
 package controller;
 
+import DAO.BorrowReturnDAO;
 import DAO.DocumentDAO;
 import DAO.UserDAO;
 import javafx.application.Platform;
@@ -24,6 +25,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import login.LoginView;
+import model.BorrowReturn;
 import model.Document;
 import model.User;
 import view.admin.AdminView;
@@ -79,10 +81,6 @@ public class AdminController {
     private Button qlNguoiDungButton;
     @FXML
     private AnchorPane quanLyNguoiDung;
-
-    private Button borrowBookButton;
-    @FXML
-    private Button returnBookButton;
     @FXML
     private VBox vboxImages;
     public static final int COL = 7;
@@ -112,7 +110,6 @@ public class AdminController {
 
 
     // Quản Lý User
-    // QL sách
     @FXML
     private TableView<User> tableViewUser;
 
@@ -143,6 +140,43 @@ public class AdminController {
             System.out.println("Username is null!");
         }
     }
+
+
+    //QL mượn
+    @FXML
+    private TextField searchUserField1;
+    @FXML
+    private  TableView<User>tableViewUser1;
+    @FXML private TableColumn<User, String> personId1Column;   // Cột ID
+    @FXML private TableColumn<User, String> personName1Column;  // Cột Name
+    @FXML private TableColumn<User, String> phoneNumber1Column;  // Cột Gender
+
+    @FXML
+    private TextField searchBookField1;
+    @FXML
+    private TableView<Document>tableViewBook1;
+    @FXML private TableColumn<Document, String> id1Column;   // Cột ID
+    @FXML private TableColumn<Document, String> title1Column;  // Cột Title
+    @FXML private TableColumn<Document, Integer> quantity1Column;  // Cột Quantity
+
+    @FXML
+    private Button borrowBookButton;
+
+
+    // QL trả
+    @FXML
+    private TextField searchInfoBorrowField;
+    @FXML
+    private TableView<BorrowReturn> infoBorrowTableView;
+    @FXML private TableColumn<BorrowReturn, String> borrowIDColumn;
+    @FXML private TableColumn<BorrowReturn, String> personID2Column;
+    @FXML private TableColumn<BorrowReturn, String> bookID2Column;
+    @FXML private TableColumn<BorrowReturn, Date> borrowDateColumn;
+    @FXML private TableColumn<BorrowReturn, Date> dueDateColumn;
+
+    @FXML private Button returnBookButton;
+
+
 
     public void closeButtonOnAction(ActionEvent e) {
         closeButton.getScene().getWindow().hide();
@@ -209,6 +243,7 @@ public class AdminController {
     public void qlTraSachButtonOnAction(ActionEvent e) {
         hideAllPanes();
         quanLyTraSach.setVisible(!quanLyTraSach.isVisible());
+        loadInfoBorrow();
     }
 
     //Cửa sổ quản lý người dùng
@@ -294,26 +329,7 @@ public class AdminController {
     // Refresh Table View Book
     public void refreshBookButtonOnAction(ActionEvent e) {
         loadBook();
-    }
-
-    // Borrow book
-    public void borrowBookButtonOnAction(ActionEvent e) {
-        BorrowCardView borrowCardView = new BorrowCardView();
-        try {
-            borrowCardView.start(new Stage()); // Mở cửa sổ mượn sách
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    // Return book
-    public void returnBookButtonOnAction(ActionEvent e) {
-        ReturnCardView returnCardView = new ReturnCardView();
-        try {
-           returnCardView.start(new Stage()); // Mở cửa sổ mượn sách
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        loadBook1();
     }
 
     // Load ảnh
@@ -462,6 +478,7 @@ public class AdminController {
     // Refresh Table View Book
     public void refreshUserButtonOnAction(ActionEvent e) {
         loadUser();
+        loadUser1();
     }
 
     // Load dữ liệu lên bảng user
@@ -526,5 +543,272 @@ public class AdminController {
     public void searchUserFieldOnAction(ActionEvent e) {
         String keyword = searchUserField.getText();
         updateTableViewUser(keyword);
+    }
+
+
+    // Quản lý Mượn
+
+    // Load bảng user1
+    public void loadUser1() {
+        // Thiết lập các cột trong TableView
+
+        personId1Column.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getId()));
+        personName1Column.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getName()));
+        phoneNumber1Column.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getPhoneNumber()));
+
+        // Lấy dữ liệu từ cơ sở dữ liệu và hiển thị lên TableView
+        UserDAO userDAO = new UserDAO();
+        List<User> userList = userDAO.findAllUsers();
+
+        // Hiển thị danh sách user
+        if (userList != null && !userList.isEmpty()) {
+            ObservableList<User> observableUserList = FXCollections.observableArrayList(userList);
+            tableViewUser1.setItems(observableUserList);  // Đặt dữ liệu cho TableView
+        } else {
+            tableViewUser1.setItems(FXCollections.observableArrayList()); // Đặt danh sách trống
+        }
+
+        // Lắng nghe thay đổi
+        searchUserField1.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue == null || newValue.trim().isEmpty()) {
+                // Nếu TextField trống, hiển thị lại toàn bộ danh sách user
+                if (userList != null && !userList.isEmpty()) {
+                    ObservableList<User> observableUserList = FXCollections.observableArrayList(userList);
+                    tableViewUser.setItems(observableUserList);  // Đặt dữ liệu cho TableView
+                } else {
+                    System.out.println("No user to display.");
+                }
+            } else {
+                // Nếu có nội dung, lọc dữ liệu và cập nhật TableView
+                updateTableViewUser1(newValue);
+            }
+        });
+    }
+
+
+    //Update bảng theo từ khóa
+    public void updateTableViewUser1(String keyword) {
+        // Lấy dữ liệu từ cơ sở dữ liệu
+        UserDAO userDAO = new UserDAO();
+        List<User> userList = userDAO.findAllUsers();
+
+        // Lọc danh sách theo keyword
+        List<User> filteredList = userList.stream()
+                .filter(user -> user.getId().toLowerCase().contains(keyword.toLowerCase()) || // Tìm theo id
+                        user.getName().toLowerCase().contains(keyword.toLowerCase()) || // Tìm theo tên
+                        user.getPhoneNumber().toLowerCase().contains(keyword.toLowerCase()) )  // Tìm theo  số điện thoại
+                .collect(Collectors.toList());
+
+        // Cập nhật TableView với dữ liệu được lọc
+        tableViewUser1.setItems(FXCollections.observableArrayList(filteredList));
+    }
+
+    public void searchUserField1OnAction(ActionEvent e) {
+        String keyword = searchUserField1.getText();
+        updateTableViewUser1(keyword);
+    }
+
+    // Load bảng book1
+
+    public void loadBook1() {
+        // Thiết lập các cột trong TableView
+
+        id1Column.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getId()));
+        title1Column.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getTitle()));
+        quantity1Column.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().getQuantity()).asObject());
+
+        // Lấy dữ liệu từ cơ sở dữ liệu và hiển thị lên TableView
+        DocumentDAO documentDAO = new DocumentDAO();
+        List<Document> documentList = documentDAO.findAllDocuments();
+        // Hiển thị danh sách sách
+        if (documentList != null && !documentList.isEmpty()) {
+            ObservableList<Document> observableDocumentList = FXCollections.observableArrayList(documentList);
+            tableViewBook1.setItems(observableDocumentList);  // Đặt dữ liệu cho TableView
+        } else {
+            tableViewBook1.setItems(FXCollections.observableArrayList()); // Đặt danh sách trống
+        }
+
+        // Lắng nghe thay đổi
+        searchBookField1.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue == null || newValue.trim().isEmpty()) {
+                // Nếu TextField trống, hiển thị lại toàn bộ danh sách sách
+                if (documentList != null && !documentList.isEmpty()) {
+                    ObservableList<Document> observableDocumentList = FXCollections.observableArrayList(documentList);
+                    tableViewBook1.setItems(observableDocumentList);  // Đặt dữ liệu cho TableView
+                } else {
+                    System.out.println("No documents to display.");
+                }
+            } else {
+                // Nếu có nội dung, lọc dữ liệu và cập nhật TableView
+                updateTableViewBook1(newValue);
+            }
+        });
+    }
+
+
+    //Update bảng theo từ khóa
+    public void updateTableViewBook1(String keyword) {
+        // Lấy dữ liệu từ cơ sở dữ liệu
+        DocumentDAO documentDAO = new DocumentDAO();
+        List<Document> documentList = documentDAO.findAllDocuments();
+
+        // Lọc danh sách theo keyword
+        List<Document> filteredList = documentList.stream()
+                .filter(document -> document.getId().toLowerCase().contains(keyword.toLowerCase()) || // Tìm trong mã sách
+                        document.getTitle().toLowerCase().contains(keyword.toLowerCase()) || // Tìm trong thể loại
+                        document.getCategory().toLowerCase().contains(keyword.toLowerCase())  )  // Tìm trong tiêu đề
+                .collect(Collectors.toList());
+
+        // Cập nhật TableView với dữ liệu được lọc
+        tableViewBook1.setItems(FXCollections.observableArrayList(filteredList));
+    }
+
+    public void searchBookField1OnAction(ActionEvent e) {
+        String keyword = searchBookField1.getText();
+        updateTableViewBook1(keyword);
+    }
+
+
+
+    // Borrow book
+
+    public void borrowBookButtonOnAction(ActionEvent e) {
+        // Lấy hàng được chọn từ bảng User và Document
+        User selectedUser = tableViewUser1.getSelectionModel().getSelectedItem();
+        Document selectedDocument = tableViewBook1.getSelectionModel().getSelectedItem();
+
+        // Kiểm tra xem cả hai bảng đều có hàng được chọn
+        if (selectedUser != null && selectedDocument != null) {
+            if (selectedDocument.getQuantity() > 0) {
+                // Nếu cả hai bảng đều có lựa chọn, thực hiện hành động mong muốn
+                System.out.println("Selected User: " + selectedUser.getName());
+                System.out.println("Selected Document: " + selectedDocument.getTitle());
+
+                try {
+                    // Tạo FXMLLoader để tải borrowcardview.fxml
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/borrowcard/borrowcardview.fxml"));
+
+                    // Tải FXML và tạo Scene
+                    Parent root = loader.load();
+
+                    // Lấy controller của cửa sổ
+                    BorrowCardController borrowCardController = loader.getController();
+                    borrowCardController.setUser(selectedUser);
+                    borrowCardController.setDocument(selectedDocument);
+
+                    borrowCardController.borrowDocument(selectedUser, selectedDocument);
+
+                    Stage stage = new Stage();
+                    stage.setScene(new Scene(root));
+                    stage.initStyle(StageStyle.UNDECORATED);
+
+                    stage.show();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            } else {
+                Alert alert1 = new Alert(Alert.AlertType.ERROR);
+                alert1.setTitle("Lỗi Mượn Sách");
+                alert1.setHeaderText("Không thể mượn sách");
+                alert1.setContentText("Số lượng sách đã hết");
+                alert1.showAndWait();
+            }
+        }
+    }
+
+
+    // QL trả sách
+
+    // Return book
+    public void returnBookButtonOnAction(ActionEvent e) {
+        BorrowReturn selectedBorrowReturn = infoBorrowTableView.getSelectionModel().getSelectedItem();
+        // Kiểm tra xem cả hai bảng đều có hàng được chọn
+        if (selectedBorrowReturn != null) {
+            try {
+                // Tạo FXMLLoader để tải borrowcardview.fxml
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/returncard/returncardview.fxml"));
+
+                // Tải FXML và tạo Scene
+                Parent root = loader.load();
+
+                // Lấy controller của cửa sổ
+                ReturnCardController returnCardController = loader.getController();
+                returnCardController.setBorrowReturn(selectedBorrowReturn);
+                returnCardController.returnDocument(selectedBorrowReturn);
+
+                Stage stage = new Stage();
+                stage.setScene(new Scene(root));
+                stage.initStyle(StageStyle.UNDECORATED);
+
+                stage.show();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+
+    public void loadInfoBorrow() {
+        // Thiết lập các cột trong TableView
+
+        borrowIDColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getMaMuon()));
+        personID2Column.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getMaNguoiMuon()));
+        bookID2Column.setCellValueFactory(cellData->new SimpleStringProperty(cellData.getValue().getMaSach()));
+        borrowDateColumn.setCellValueFactory(cellData -> {
+            return new SimpleObjectProperty<>(cellData.getValue().getNgayMuon());
+        });
+        dueDateColumn.setCellValueFactory(cellData -> {
+            return new SimpleObjectProperty<>(cellData.getValue().getNgayHenTra());
+        });
+
+
+        // Lấy dữ liệu từ cơ sở dữ liệu và hiển thị lên TableView
+        BorrowReturnDAO borrowReturnDAO = new BorrowReturnDAO();
+        List<BorrowReturn> borrowReturnList = borrowReturnDAO.findAllInfo();
+        // Hiển thị danh sách sách
+        if (borrowReturnList != null && !borrowReturnList.isEmpty()) {
+            ObservableList<BorrowReturn> observableBorrowReturnList = FXCollections.observableArrayList(borrowReturnList);
+            infoBorrowTableView.setItems(observableBorrowReturnList);  // Đặt dữ liệu cho TableView
+        } else {
+            infoBorrowTableView.setItems(FXCollections.observableArrayList()); // Đặt danh sách trống
+        }
+
+        // Lắng nghe thay đổi
+        searchInfoBorrowField.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue == null || newValue.trim().isEmpty()) {
+                if (borrowReturnList != null && !borrowReturnList.isEmpty()) {
+                    ObservableList<BorrowReturn> observableBorrowReturnList = FXCollections.observableArrayList(borrowReturnList);
+                    infoBorrowTableView.setItems(observableBorrowReturnList);  // Đặt dữ liệu cho TableView
+                } else {
+                    System.out.println("No info borrow to display.");
+                }
+            } else {
+                // Nếu có nội dung, lọc dữ liệu và cập nhật TableView
+                updateInfoBorrowTableView(newValue);
+            }
+        });
+    }
+
+
+    //Update bảng theo từ khóa
+    public void updateInfoBorrowTableView(String keyword) {
+        // Lấy dữ liệu từ cơ sở dữ liệu
+        BorrowReturnDAO borrowReturnDAO = new BorrowReturnDAO();
+        List<BorrowReturn> borrowReturnList = borrowReturnDAO.findAllInfo();
+
+        // Lọc danh sách theo keyword
+        List<BorrowReturn> filteredList = borrowReturnList.stream()
+                .filter(borrowReturn -> borrowReturn.getMaMuon().toLowerCase().contains(keyword.toLowerCase()) || // Tìm trong mã sách
+                        borrowReturn.getMaNguoiMuon().toLowerCase().contains(keyword.toLowerCase()) || // Tìm trong thể loại
+                        borrowReturn.getNgayMuon().toString().toLowerCase().contains(keyword.toLowerCase()) ||
+                        borrowReturn.getMaSach().toLowerCase().contains(keyword.toLowerCase())  )  // Tìm trong tiêu đề
+                .collect(Collectors.toList());
+
+        // Cập nhật TableView với dữ liệu được lọc
+        infoBorrowTableView.setItems(FXCollections.observableArrayList(filteredList));
+    }
+
+    public void searchInfoBorrowFieldOnAction(ActionEvent e) {
+        String keyword = searchInfoBorrowField.getText();
+        updateTableViewBook(keyword);
     }
 }
