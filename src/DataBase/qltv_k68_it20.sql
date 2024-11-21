@@ -31,8 +31,9 @@ create table Borrowing
 );
 drop table Borrowing;
 
-alter table borrowing
-drop column STT;
+alter table Borrowing
+drop TrangThai;
+
 
 create table user
 (
