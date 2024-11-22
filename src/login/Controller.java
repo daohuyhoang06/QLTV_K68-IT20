@@ -1,11 +1,14 @@
 package login;
 
+import DAO.UserDAO;
 import controller.AdminController;
+import controller.UserController;
 import javafx.stage.StageStyle;
 import login.loginDAO;
 import javafx.util.Duration;
 import javafx.animation.PauseTransition;
 import javafx.util.Duration;
+import model.User;
 import view.admin.AdminView;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -22,6 +25,8 @@ import java.io.IOException;
 public class Controller {
     @FXML
     private Button closeButton;
+    @FXML
+    private Button minimizeButton;
     @FXML
     private Label loginMessageLabel;
     @FXML
@@ -51,7 +56,7 @@ public class Controller {
                 successLogin.setVisible(true);
 
                 // Sử dụng PauseTransition để trì hoãn chuyển đổi
-                PauseTransition pause = new PauseTransition(Duration.seconds(1.5)); // Thời gian chờ 3 giây
+                PauseTransition pause = new PauseTransition(Duration.seconds(1)); // Thời gian chờ 3 giây
                 pause.setOnFinished(event -> {
                     try {
                         // Đóng cửa sổ đăng nhập
@@ -95,16 +100,39 @@ public class Controller {
             } else {
                 // Hiển thị thông báo
                 successLogin.setVisible(true);
+                UserDAO userDAO = new UserDAO();
+                User user = userDAO.findUserByUserName(usernameTextField.getText());
 
                 // Sử dụng PauseTransition để trì hoãn chuyển đổi
-                PauseTransition pause = new PauseTransition(Duration.seconds(1.5)); // Thời gian chờ 3 giây
+                PauseTransition pause = new PauseTransition(Duration.seconds(1)); // Thời gian chờ 3 giây
                 pause.setOnFinished(event -> {
-                    // Mở cửa sổ UserView
-                   UserView userView = new UserView();
                     try {
-                        userView.start(new Stage()); // Mở cửa sổ AdminView
-                        closeButton.getScene().getWindow().hide(); // Đóng cửa sổ đăng nhập
-                    } catch (Exception ex) {
+
+                        // Đóng cửa sổ đăng nhập
+                        closeButton.getScene().getWindow().hide();
+
+                        // Tạo FXMLLoader để tải userview.fxml
+                        FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/user/userview.fxml"));
+
+                        // Tải FXML và tạo Scene
+                        Parent root = loader.load();
+
+                        // Lấy controller của cửa sổ User từ FXMLLoader
+                        UserController userController = loader.getController();
+                        userController.loadImage();
+                        userController.setUser(user);
+                        userController.setName(user.getName());
+                        userController.loadBook();
+                        userController.loadBorrowBook();
+
+                        // Tạo và hiển thị cửa sổ UserView
+                        Stage stage = new Stage();
+                        stage.setScene(new Scene(root));
+                        stage.initStyle(StageStyle.UNDECORATED);
+
+                        stage.show();
+
+                } catch (Exception ex) {
                         ex.printStackTrace();
                     }
                 });
@@ -117,6 +145,13 @@ public class Controller {
     // Xử lý sự kiện nút close
     public void closeButtonOnAction(ActionEvent e) {
         closeButton.getScene().getWindow().hide();
+    }
+
+    public void minimizeButtonOnAction(ActionEvent e) {
+        // Lấy Stage hiện tại
+        Stage stage = (Stage) closeButton.getScene().getWindow();
+        // Thu nhỏ cửa sổ
+        stage.setIconified(true);
     }
 
 

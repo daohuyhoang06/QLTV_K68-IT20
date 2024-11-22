@@ -43,7 +43,7 @@ create table user
 	GioiTinh varchar(50) not null,
 	DiaChi varchar(100) not null,
     Email varchar(100) not null unique,
-	SoDienThoai int,
+	SoDienThoai varchar(15),
     TenDangNhap VARCHAR(50) NOT NULL unique,
     MatKhau VARCHAR(255) NOT NULL,
     Picture mediumblob,
@@ -72,7 +72,16 @@ create table admin
 	constraint pk_personID primary key (personID)
 );
 -- drop table admin
+CREATE TABLE IF NOT EXISTS Rating (
+    MaSach VARCHAR(50) PRIMARY KEY,
+    DiemSo DECIMAL(2, 1) DEFAULT 0,
+    SoLuotDanhGia INT DEFAULT 0,
+    CONSTRAINT fk_MaSach_Rating FOREIGN KEY (MaSach) REFERENCES Document(MaSach)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE
+    );
 
+drop table Rating;
 
 INSERT INTO admin (STT, personID, HoTen, NgaySinh, GioiTinh, DiaChi, Email, SoDienThoai, TenDangNhap, MatKhau)
 VALUES

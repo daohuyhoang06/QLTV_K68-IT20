@@ -4,6 +4,7 @@ import DataBase.JDBCConnection;
 import model.BorrowReturn;
 import model.Document;
 import model.User;
+import org.jetbrains.annotations.Nullable;
 import util.Date;
 
 import java.sql.Connection;
@@ -227,11 +228,99 @@ public class BorrowReturnDAO {
     }
 
 
+    /**
+     * Kiểm tra  người dùng  đã mượn sách theo mã người dùng.
+     *
+     * @param ID mã người dùng cần tìm
+     * @return true tương ứng nếu tìm thấy, false nếu không tìm thấy
+     */
+
+    public  boolean findUserById(String ID) {
+        if (ID == null || ID.isEmpty()) {
+            System.err.println("ID người dùng không tồn tại...");
+            return false;
+        }
+
+        String sql = "SELECT * FROM borrowing WHERE personID = ?";
+        try (Connection connection = JDBCConnection.getJDBCConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+
+            preparedStatement.setString(1, ID);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return true;
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi tìm kiếm người dùng theo ID");
+        }
+        return false;
+    }
+
+    /**
+     * Kiểm tra sách đã được mượn sách theo mã sách.
+     *
+     * @param ID mã sách cần tìm
+     * @return true tương ứng nếu tìm thấy, false nếu không tìm thấy
+     */
+    public  boolean findBookById(String ID) {
+        if (ID == null || ID.isEmpty()) {
+            System.err.println("ID sách không tồn tại...");
+            return false;
+        }
+
+        String sql = "SELECT * FROM borrowing WHERE MaSach = ?";
+        try (Connection connection = JDBCConnection.getJDBCConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+
+            preparedStatement.setString(1, ID);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return true;
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi tìm kiếm sách theo ID");
+        }
+        return false;
+    }
+
+    /**
+     * Tìm kiếm thông tin mượn sách  theo mã người dùng.
+     *
+     * @param ID mã người dùng cần tìm
+     * @return  list tương ứng nếu tìm thấy, null nếu không tìm thấy
+     */
+    public List<BorrowReturn> findInfoByUserID(String ID) {
+        List<BorrowReturn> borrowReturnList = new ArrayList<>();
+        String sql = "SELECT * FROM borrowing WHERE personID = ?";
+
+        try (Connection connection = JDBCConnection.getJDBCConnection();
+
+             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+
+            preparedStatement.setString(1, ID);
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    borrowReturnList.add(extractBorrowReturnFromResultSet(resultSet));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error finding document by category: " + e.getMessage());
+        }
+        return borrowReturnList;
+    }
+
+
     private BorrowReturn extractBorrowReturnFromResultSet(ResultSet resultSet) throws SQLException {
         BorrowReturn borrowReturn = new BorrowReturn();
         borrowReturn.setMaMuon(resultSet.getString("MaMuon"));
         borrowReturn.setMaNguoiMuon(resultSet.getString("personID"));
         borrowReturn.setMaSach(resultSet.getString("MaSach"));
+        DocumentDAO documentDAO = new DocumentDAO();
+        Document document = documentDAO.findDocumentById(borrowReturn.getMaSach());
+        borrowReturn.setTenSach(document.getTitle());
 
         java.sql.Date sqlBorrowDate = resultSet.getDate("NgayMuon");
         Date borrowDate = Date.fromSqlDate(sqlBorrowDate);
