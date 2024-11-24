@@ -13,6 +13,8 @@ create table Document
 	constraint pk_MaSach primary key (MaSach)
 );
  drop table Document;
+
+delete from Document;
  
  alter table document
  drop column STT;
@@ -31,8 +33,7 @@ create table Borrowing
 );
 drop table Borrowing;
 
-alter table Borrowing
-drop TrangThai;
+
 
 
 create table user
