@@ -285,16 +285,18 @@ public class AdminController {
         String theme = themeField.getText();
         String quantity = quantityField.getText();
 
-        if(theme != null && quantity != null) {
+        // Kiểm tra nội dung các trường
+        if (theme != null && !theme.trim().isEmpty() && quantity != null && !quantity.trim().isEmpty()) {
             GoogleBooksImporter googleBooksImporter = new GoogleBooksImporter();
             googleBooksImporter.importBooksToDatabase(theme, Integer.parseInt(quantity));
             loadBook();
             loadBook1();
         } else {
+            // Thông báo lỗi khi các trường bị bỏ trống
             Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Lỗi Lấy Sách");
+            alert.setTitle("Lỗi Nhập Dữ Liệu");
             alert.setHeaderText("Không thể lấy sách.");
-            alert.setContentText("Vui lòng kiểm tra lại thông tin hoặc thử lại sau.");
+            alert.setContentText("Vui lòng nhập đầy đủ thông tin vào các trường.");
             alert.showAndWait();
         }
     }
